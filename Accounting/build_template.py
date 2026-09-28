@@ -747,7 +747,9 @@ def w_line(key, sign, header=None):
     a = ACC[key]
     prefix = "−Δ " if sign == -1 else "+Δ "
     put(w, f"B{r}", f'="{prefix}"&{a["title"]}')
-    put(w, f"C{r}", f"={'-' if sign == -1 else ''}'Balance Sheet'!E{BS[key]}", num=NUM)
+    # the Balance Sheet shows contra-assets as negatives, so every asset-side row (incl. contras) is negated
+    negate = sign == -1 or a["kind"] == "CA"
+    put(w, f"C{r}", f"={'-' if negate else ''}'Balance Sheet'!E{BS[key]}", num=NUM)
     for col in "DEF":
         put(w, f"{col}{r}", None, color=INPUT_BLUE, num=NUM, border=Border(bottom=hair))
     put(w, f"G{r}", f"=C{r}-SUM(D{r}:F{r})", num=NUM)
