@@ -24,15 +24,17 @@ post("Inventories",24000,[(1,248000)],[("2b",80000),("3b",160000)])
 post("Land",300000)
 post("Buildings",100000)
 post("Accum. depreciation – Buildings",None,[],[(11,5000)])
+post("Accum. depreciation – Furn. & equip.",None,[],[(12,4000)])
+post("Accumulated amortization",None,[],[(13,6000)])
 post("Furniture & equipment",20000)
 post("Software / intangible assets",12000,rename="Website (intangible asset)")
 post("Accounts payable",12000,[(5,210000)],[(1,248000)])
 post("Short-term loans / current portion LTD",110000,[(8,110000)],[],rename="Bank loan")
 post("Other liability (rename)",80000,[(7,80000)],[],rename="Payable for land & building (B. Roca)")
 post("Share capital",500000)
-post("Retained profits",None,[],[("CE",120000)])
+post("Retained profits",None,[],[("CE",110000)])
 post("Profit & loss for the period (P&L)",None,
-     [("2b",80000),("3b",160000),(6,90000),(9,5000),(11,5000),("CE",120000)],
+     [("2b",80000),("3b",160000),(6,90000),(9,5000),(11,5000),(12,4000),(13,6000),("CE",110000)],
      [("2a",150000),("3a",310000)])
 # ---- Journal ----
 j=wb['Journal']
@@ -78,8 +80,12 @@ J=[
  (10,"","Cash & cash equivalents",None,20000,"A−","I"),
  (11,"Year-end adjustment: building depreciation 100,000 / 20 years","P&L – Depreciation expense",5000,None,"Exp (OE−)","Non-cash"),
  (11,"","Accum. depreciation – Buildings",None,5000,"Contra-A+",""),
- ("CE","Closing entry: net profit to retained profits","Profit & loss for the period (P&L)",120000,None,"OE−","Non-cash"),
- ("CE","","Retained profits",None,120000,"OE+",""),
+ (12,"Year-end adjustment: furniture & equipment depreciation 20,000 / 5 years (per Exhibit 1 of case B)","P&L – Depreciation expense",4000,None,"Exp (OE−)","Non-cash"),
+ (12,"","Accum. depreciation – Furn. & equip.",None,4000,"Contra-A+",""),
+ (13,"Year-end adjustment: website amortization 12,000 / 2 years (per Exhibit 1 of case B)","P&L – Amortization expense",6000,None,"Exp (OE−)","Non-cash"),
+ (13,"","Accumulated amortization",None,6000,"Contra-A+",""),
+ ("CE","Closing entry: net profit to retained profits","Profit & loss for the period (P&L)",110000,None,"OE−","Non-cash"),
+ ("CE","","Retained profits",None,110000,"OE+",""),
 ]
 for i,row in enumerate(J):
     r=7+i
@@ -100,7 +106,7 @@ def setlab(ws,label,val,newlabel=None):
 setlab(s,"Sales revenue",460000,"Sales revenue (100 × 1,500 + 200 × 1,550)")
 setlab(s,"− Cost of goods",-240000,"− Cost of goods sold (300 × 800)")
 setlab(s,"− Marketing & selling",-90000,"− Selling & administrative expenses")
-setlab(s,"− Depreciation",-5000,"− Depreciation expense (building 100,000 / 20)")
+setlab(s,"− Depreciation",-15000,"− Depreciation & amortization (building 5,000 + F&E 4,000 + website 6,000)")
 setlab(s,"− Financial exp",-5000)
 setlab(s,"− Tax",0,"− Tax expense (no tax information in the case)")
 # ---- Cash flow direct ----
@@ -114,11 +120,11 @@ setlab(c,"− Investment in shares",-20000)
 setlab(c,"− Loan & mortgage",-110000,"− Bank loan repayment")
 # ---- CF worksheet ----
 w=wb['CF Worksheet']
-rows=dict(mktsec=6,ar=7,inv=8,ad_bldg=17,ap=21,stloan=27,other_l=28,rp=34)
+rows=dict(mktsec=6,ar=7,inv=8,ad_bldg=17,ad_fe=18,am_sw=19,ap=21,stloan=27,other_l=28,rp=34)
 vals=dict(mktsec=("E",-20000,"Purchase of securities"),ar=("D",-90000,"Credit sales not yet collected"),
-          inv=("D",-8000,"40 mixers left (32,000) vs 30 (24,000)"),ad_bldg=("D",5000,"Depreciation added back (non-cash)"),
+          inv=("D",-8000,"40 mixers left (32,000) vs 30 (24,000)"),ad_bldg=("D",5000,"Depreciation added back (non-cash)"),ad_fe=("D",4000,"F&E depreciation added back"),am_sw=("D",6000,"Website amortization added back"),
           ap=("D",38000,"Purchases not yet paid"),stloan=("F",-110000,"Loan repaid"),
-          other_l=("E",-80000,"Deferred price of land & building paid"),rp=("D",120000,"Net profit via closing entry"))
+          other_l=("E",-80000,"Deferred price of land & building paid"),rp=("D",110000,"Net profit via closing entry"))
 for k,(col,v,txt) in vals.items():
     w[f"{col}{rows[k]}"]=v; w[f"H{rows[k]}"]=txt
 # ---- Corrections sheet ----
@@ -136,10 +142,10 @@ rows=[
  (3,"Inventories","248,000 (purchases only)","BB 24,000 + 248,000 − 240,000 = 32,000","Missing the 24,000 beginning stock and the cost of the 300 mixers sold (credit side). 40 mixers left × 800 = 32,000."),
  (4,"Accounts receivable + P&L sales","231,000","310,000","Credit sales = 200 mixers × 1,550 = 310,000. Total sales = 150,000 + 310,000 = 460,000. AR ends at 90,000, not 11,000."),
  (5,"P&L – COGS","missing","240,000 (80,000 + 160,000)","Each sale is two entries: revenue AND cost of goods sold (Dr P&L, Cr Inventories), 300 × 800."),
- (6,"Accumulated depreciation","empty","5,000","The building has a 20-year life, so 100,000 / 20 = 5,000 depreciation for 2010 (Dr P&L, Cr Accum. depreciation). Land is not depreciated."),
- (7,"P&L / Retained profits","P&L balance 286,000; RP empty","Net profit 120,000 closed to RP","Once COGS and depreciation are recorded, profit is 120,000. The closing entry moves it to retained profits."),
+ (6,"Depreciation & amortization","empty","15,000","Building 100,000 / 20 = 5,000; furniture 20,000 / 5 = 4,000; website 12,000 / 2 = 6,000 (lives confirmed by Exhibit 1 of case B). Land is not depreciated."),
+ (7,"P&L / Retained profits","P&L balance 286,000; RP empty","Net profit 110,000 closed to RP","Once COGS and depreciation are recorded, profit is 110,000. The closing entry moves it to retained profits."),
  (8,"Structure","2009 and 2010 mixed, no BB","Dec-2009 balances as BB, 2010 entries on top","The case asks for the balance sheet at Dec 31, 2009 AND at Dec 31, 2010. You need beginning balances to show both."),
- (9,"Income statement & cash flow sheets","labels only","filled (see sheets)","Net profit 120,000. CFO 65,000, CFI −100,000, CFF −110,000, change in cash −145,000 (246,000 → 101,000)."),
+ (9,"Income statement & cash flow sheets","labels only","filled (see sheets)","Net profit 110,000. CFO 65,000, CFI −100,000, CFF −110,000, change in cash −145,000 (246,000 → 101,000)."),
 ]
 r=3
 for i,h in enumerate(hdr):
@@ -161,8 +167,8 @@ cs[f"B{r}"]=("Cash T-account (all 16 movements, ending at 101,000), accounts pay
 cs[f"B{r}"].font=F(size=9); cs[f"B{r}"].alignment=Alignment(wrap_text=True,vertical="top"); cs.row_dimensions[r].height=45
 r+=2
 cs[f"B{r}"]="Assumptions made (the case gives no data)"; cs[f"B{r}"].font=F(bold=True)
-for txt in ["No income tax: the case gives no tax rate. If your professor uses one, tax = rate × 120,000 profit before tax.",
-            "Website (12,000) and furniture (20,000) are not amortized/depreciated because no useful life is given. Only the building is depreciated.",
+for txt in ["No income tax: the case gives no tax rate.",
+            "Furniture 5-year life and website 2-year life: not stated in case (A), taken from the professor's Exhibit 1 in case (B) (balance sheet at Dec 31, 2010).",
             "Depreciation of the building is a full year (bought Dec 30, 2009).",
             "Marketable securities are treated as an investment (CFI), not a cash equivalent, because no maturity is given.",
             "The bank loan is shown as a current liability at Dec 2009 because it was repaid during 2010."]:
